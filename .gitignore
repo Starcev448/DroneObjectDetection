@@ -29,6 +29,10 @@ results/
 dataset/VisDrone2019-DET-train/
 dataset/VisDrone2019-DET-val/
 
+# COCO JSON
+dataset/coco/*.json
+
 # Системные файлы
 .DS_Store
 Thumbs.db
+
