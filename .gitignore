@@ -36,3 +36,10 @@ dataset/coco/*.json
 .DS_Store
 Thumbs.db
 
+# Обученные модели
+runs/
+*.pt
+
+# Подготовленный датасет YOLO
+dataset/images/
+dataset/labels/
