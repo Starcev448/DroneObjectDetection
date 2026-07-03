@@ -4,11 +4,9 @@ import sys
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 import torch
-import torchvision
 
 from torch.utils.data import DataLoader, random_split
-from torchvision.models.detection import retinanet_resnet50_fpn
-from torchvision.models.detection.retinanet import RetinaNetClassificationHead
+from torchvision.models.detection import fcos_resnet50_fpn
 from torchvision.transforms import v2 as T
 
 from datasets import VisDroneDataset
@@ -51,13 +49,12 @@ dataset = VisDroneDataset(
 
 print("Изображений:", len(dataset))
 
-
 train_size = int(len(dataset) * 0.9)
 val_size = len(dataset) - train_size
 
 train_dataset, val_dataset = random_split(
     dataset,
-    [train_size, val_size]
+    [train_size, val_size],
 )
 
 
@@ -81,17 +78,11 @@ val_loader = DataLoader(
 
 
 # -----------------------------
-# RetinaNet
+# FCOS
 # -----------------------------
-model = retinanet_resnet50_fpn(weights="DEFAULT")
-
-num_anchors = model.head.classification_head.num_anchors
-
-in_channels = model.backbone.out_channels
-
-model.head.classification_head = RetinaNetClassificationHead(
-    in_channels=in_channels,
-    num_anchors=num_anchors,
+model = fcos_resnet50_fpn(
+    weights=None,
+    weights_backbone=None,
     num_classes=NUM_CLASSES,
 )
 
@@ -105,7 +96,7 @@ params = [p for p in model.parameters() if p.requires_grad]
 
 optimizer = torch.optim.AdamW(
     params,
-    lr=0.0005,
+    lr=LEARNING_RATE,
     weight_decay=0.0001,
 )
 
@@ -123,7 +114,7 @@ os.makedirs("models", exist_ok=True)
 
 for epoch in range(EPOCHS):
 
-    print(f"\n========== ЭПОХА {epoch+1}/{EPOCHS} ==========\n")
+    print(f"\n========== ЭПОХА {epoch + 1}/{EPOCHS} ==========\n")
 
     train_one_epoch(
         model,
@@ -138,12 +129,12 @@ for epoch in range(EPOCHS):
 
     torch.save(
         model.state_dict(),
-        f"models/retinanet_epoch_{epoch+1}.pth",
+        f"models/fcos_epoch_{epoch+1}.pth",
     )
 
 torch.save(
     model.state_dict(),
-    "models/retinanet_final.pth",
+    "models/fcos_final.pth",
 )
 
 print("\nОбучение завершено.")
